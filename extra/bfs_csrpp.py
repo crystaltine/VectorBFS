@@ -9,7 +9,7 @@ from csrpp.csrpp3 import BitArrayGraph, TorchGraph3, TorchGraph4
 from time import perf_counter
 from random import randint
 
-MAX_INDEX = 4096
+MAX_INDEX = 65536
 FILENAME = f'graph{MAX_INDEX}_transformed'
 GRAPH_CLASS = TorchGraph4
 TESTSET_LEN = 20

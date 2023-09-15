@@ -492,21 +492,73 @@ class TorchGraph4:
         visited[start_idx] = 1
         
         curr = visited.clone()
+        curr_depth = 0
+        
+        #total_curr_update_time = [0, 0, 0]
+        
+        while True: # assume connected graph           
+            curr_depth += 1
+            
+            #start_time = perf_counter()
+            curr = self.vertices[curr]
+            #total_curr_update_time[0] += perf_counter() - start_time
+            #start_time = perf_counter()
+            curr = curr.any(dim=0)
+            #total_curr_update_time[1] += perf_counter() - start_time
+            #start_time = perf_counter()
+            curr = curr & ~visited
+            #total_curr_update_time[2] += perf_counter() - start_time
+            
+            # if end_idx is in curr, return curr_depth
+            if curr[end_idx]: 
+                #print(f"\ntimes: {[f'{1000*t:.2f}ms' for t in total_curr_update_time]}")
+                return curr_depth
+            
+            # Set all visited vertices to 1
+            
+            visited[curr] = 1
+            
+    
+    def bfs4(self, start_idx: int, end_idx: int):
+        
+        visited = torch.zeros(len(self.vertices), dtype=torch.bool)
+        
+        curr = visited.clone()
+        curr[start_idx] = 1
         
         curr_depth = 0
         
-        while True: # assume connected graph
+        while curr.any(): # assume connected graph
             
+            curr_depth += 1
+            # filter out visited vertices
+            curr = torch.any(self.vertices[~visited][curr], dim=0)
+            
+            # return if end_idx is in curr
+            if curr[end_idx]: return curr_depth
+            
+            # Set all visited vertices to 1
+            visited[curr] = 1
+        return -1
+    
+    def bfs_bitarray(self, start_idx: int, end_idx: int):
+        
+        visited = bitarray(len(self.vertices))
+        visited.setall(0)
+        visited[start_idx] = 1
+        
+        curr = visited.copy()
+        curr_depth = 0
+        
+        while curr.any():
             if visited[end_idx]: return curr_depth
             
             curr_depth += 1
             
-            next = torch.any(self.vertices[curr], dim=0)
-            curr = next & ~visited
+            # XXX - issue with indexing the list
+            curr = self.vertices[curr] & ~visited
             
-            # Set all visited vertices to 1
-            visited[curr] = 1
-            
+            visited[curr] = 1        
 
     def bfs2(self, start_idx: int, end_idx: int):
         
@@ -592,3 +644,23 @@ class BitArrayGraph:
             curr = self.vertices[curr] & ~visited
             
             visited[curr] = 1
+            
+    def bfs_bad(self, start_idx: int, end_idx: int):
+        
+        visited = bitarray(len(self.vertices))
+        visited.setall(0)
+        visited[start_idx] = 1
+        
+        curr = visited.copy()
+        curr_depth = 0
+        
+        while curr.any():
+            if visited[end_idx]: return curr_depth
+            
+            curr_depth += 1
+            
+            # XXX - issue with indexing the list
+            # Temp fix: use torch.any
+            curr = bitarray(torch.any(torch.tensor(self.vertices)[curr], dim=0).tolist()) & ~visited
+            
+            visited |= curr

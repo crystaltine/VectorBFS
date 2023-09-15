@@ -1,4 +1,4 @@
-from csrpp.csrpp3 import CSRPP3, CSRPP3_Torch, CSRPP3_Torch_2, TorchGraph3, TorchGraph4
+from graphs.csrpp3 import CSRPP3, CSRPP3_Torch, CSRPP3_Torch_2, TorchGraph3, TorchGraph4
 from time import perf_counter
 
 def get_csrpp3_from_transformed_data(filename: str) -> CSRPP3:
