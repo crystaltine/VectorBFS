@@ -1,4 +1,4 @@
-from csrpp.csr import CSRGraph
+from graphs.csr import CSRGraph
 from utils import _get_progress_string
 
 FILEPATH = 'data/graph4096.txt'
