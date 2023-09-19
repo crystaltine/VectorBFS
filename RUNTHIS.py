@@ -1,8 +1,5 @@
 from gen.csrpp3_from_transformed_data import (
-    get_csrpp3_torch_from_transformed_data, 
     get_csrpp3_from_transformed_data, 
-    get_csrpp3_torch_2_from_transformed_data,
-    get_torch_graph_3, get_torch_graph_4,
     get_graph_generic
 )
 from graphs.csrpp3 import BitArrayGraph, TorchGraph3, TorchGraph4

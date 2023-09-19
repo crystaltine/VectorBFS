@@ -3,7 +3,7 @@ import torch
 from time import perf_counter
 from bitarray import bitarray
 
-from stack_queue import Queue
+from extra.stack_queue import Queue
 
 class Vertex:
     """
@@ -467,6 +467,13 @@ class TorchGraph3:
         
         return -1
 
+    def bfs3(self, start_idx: int, end_idx: int) -> int:
+        visited = bitarray(len(self.degrees)) # i.e. visited[8] = 1 means vertex 8 has been visited
+        visited.setall(0)
+        visited[start_idx] = 1
+        
+        curr = self.vertices[start_idx]
+
 class TorchGraph4:
     """
     Another version which is optimized for BFS - unweighted, default directed
@@ -664,3 +671,34 @@ class BitArrayGraph:
             curr = bitarray(torch.any(torch.tensor(self.vertices)[curr], dim=0).tolist()) & ~visited
             
             visited |= curr
+
+class CSRGraph:
+    def __init__(self, init_vertices = 4096, init_edges = 24576):
+        """
+        Unweighted, directed by default.
+        """
+        self.pointers = torch.zeros(init_vertices + 1, dtype=torch.int32) # each number represents the index of the first edge of the vertex
+        self.edges = torch.zeros((init_vertices,), dtype=torch.int32) # each number represents the vertex that the edge connects to
+        
+    def generate_from_lists(self, pointer_list: list[int], edge_list: list[int]) -> None:
+        """
+        `edge_list` formatted as [vertex1, vertex2, vertex1, vertex3, ...] where each vertex represents a connection.
+        `pointer_list` formatted as [0, 2, 3, 8, ...] where each number represents the index of the first edge of the vertex
+        """
+        self.pointers = torch.tensor(pointer_list)        
+        self.edges = torch.tensor(edge_list)
+        
+    def bfs(self, start_node: int, end_node: int) -> int:
+        """
+        Returns the shortest number of edges that must be traversed to get from start to end.
+        """
+        
+        visited = bitarray(len(self.pointers))
+        visited.setall(0)
+        visited[start_node] = 1
+        
+        curr = self.edges[self.pointers[start_node]:self.pointers[start_node+1]]
+        
+        while visited[end_node] == 0:
+            visited[curr] = 1
+            curr = self.edges[self.pointers[curr]:self.pointers[curr+1]]
